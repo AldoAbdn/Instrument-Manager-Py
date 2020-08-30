@@ -4,13 +4,13 @@
 // Query Instrument
 function query(id, query)
 {
-    fetch(`./api/instrument/${id}/${query}`)
+    fetch(`./api/instrument/${id}?query=${query}`)
         .then((response) => { 
             if(response.status != 200){
                 alert(response.statusText);
             } else {
                 response.json().then((data) => {
-                    alert(data);
+                    alert(data.result);
                 });
             }
         }).catch((error) => {
