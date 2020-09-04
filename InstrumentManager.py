@@ -1,5 +1,7 @@
 import sys, getopt, pyvisa
 from flask import Flask, render_template, jsonify, request
+from instrument import Instrument
+import json
 
 app = Flask(__name__)
 
@@ -22,15 +24,17 @@ def index():
 def instruments(search="?*::INSTR"):
     instruments = getInstrumentDetails(search)
     numResults = len(instruments)
-    response = {"numResults":numResults,"instruments":instruments}
+    for x in range(len(instruments)):
+        instruments[x] = instruments[x].__dict__
+    response = {"search":search,"numResults":numResults,"instruments":instruments}
     return jsonify(response)
 
 @app.route('/api/instrument/<ID>')
 def instrument(ID):
     query = request.args.get("query")
     if query == None:
-        instrumentDetails = getInstrumentDetails(ID)
-        response = {"ID":ID, "instrument":instrumentDetails}
+        instrumentDetails = getInstrumentDetail(ID)
+        response = {"ID":ID, "instrument":instrumentDetails.__dict__}
         return jsonify(response)
     else:
         result = queryInstrument(ID, query)
@@ -40,7 +44,13 @@ def instrument(ID):
 # Util
 def getInstrumentDetail(ID):
     instrument = resourceManager.open_resource(ID)
-    instrumentDetails = instrument.resource_info[0]
+    instrumentDetails = Instrument(instrument.resource_name, instrument.resource_manufacturer_name, instrument.interface_number, "")
+    try:
+        instrumentDetails.status = instrument.last_status
+    except:
+        instrumentDetails.status = ""
+    if not isinstance(instrumentDetails.manufacturer, str):
+        instrumentDetails.manufacturer = ""
     if instrument != None:
         instrument.close()
     return instrumentDetails
@@ -60,8 +70,8 @@ def getInstrumentDetails(query="?*::INSTR"):
     ids = resourceManager.list_resources(query)
     for ID in ids:
         instrument = resourceManager.open_resource(ID)
-        if instrument.resource_info[1] == pyvisa.constants.StatusCode.success:
-            instrumentDetails.append(instrument.resource_info[0])
+        instrumentDetail = getInstrumentDetail(ID)
+        instrumentDetails.append(instrumentDetail)
         instrument.close()
     return instrumentDetails
 

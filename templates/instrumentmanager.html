@@ -9,11 +9,9 @@
         <thead>
         <tr>
             <th>Name</th>
-            <th>Alias</th>
             <th>Manufacturer</th>
-            <th>Class</th>
-            <th>Interface Type</th>
             <th>Board Number</th>
+            <th>Last Status</th>
             <th>IDN</th>
             <th>Self Test</th>
 	    <th>Query</th>
@@ -22,17 +20,17 @@
         <tbody>
         {% for instrument in instrumentDetails %}
         <tr>
-            <td>{{ instrument.resource_name }}</td>
-            <td>{{ instrument.alias }}</td>
-            <td>{{ instrument.resource_manufacturer_name }}</td>
-            <td>{{ instrument.resource_class }}</td>
-            <td>{{ instrument.interface_type }}</td>
-            <td>{{ instrument.interface_board_number }}</td>
-            <td><button onclick="query('{{ instrument.resource_name }}','*IDN?')">IDN</button</td>
-            <td><button onclick="query('{{ instrument.resource_name }}','*TST?')">Self Test</button></td>
+            <td>{{ instrument.name }}</td>
+            <td>{{ instrument.manufacturer }}</td>
+            <td>{{ instrument.board_number }}</td>
+            <td>{{ instrument.status }}</td>
+            <td><button class="{{ instrument.name }}-button" onclick="query('{{ instrument.name }}','*IDN?')">IDN</button</td>
+            <td><button class="{{ instrument.name }}-button" onclick="query('{{ instrument.name }}','*TST?')">Self Test</button></td>
             <td>
-                <input type="text" id="query" name="query"/>
-                <button onclick="query('{{ instrument.resource_name }}',document.getElementById('query').value)">Query</button>
+                <form onsubmit="event.preventDefault(); query('{{ instrument.name }}',document.getElementById('{{ instrument.name }}-query').value); return false;">
+                    <input type="text" id="{{ instrument.name }}-query" name="queryText"/>
+                    <button class="{{ instrument.name }}-button" onclick="query('{{ instrument.name }}',document.getElementById('{{ instrument.name }}-query').value)">Query</button>
+                </form>
             </td>
         </tr>
         {% endfor %}
