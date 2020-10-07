@@ -7,7 +7,7 @@ app = Flask(__name__)
 
 opts, args = getopt.getopt(sys.argv[1:],"s")
 if len(opts) > 0:
-    resourceManager = pyvisa.ResourceManager('@sim')
+    resourceManager = pyvisa.ResourceManager('dummy_instruments.yaml@sim')
     print("Sim")
 else:
     resourceManager = pyvisa.ResourceManager('@py')
