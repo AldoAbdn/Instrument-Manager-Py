@@ -6,16 +6,16 @@ devices:
         q: "\r\n"
         r: "\n"
       USB INSTR:
-        q: "\r\n"
+        q: "\r"
         r: "\n"
       TCPIP INSTR:
-        q: "\r\n"
+        q: "\r"
         r: "\n"
       TCPIP SOCKET:
-        q: "\r\n"
+        q: "\r"
         r: "\n"
       GPIB INSTR:
-        q: "\r\n"
+        q: "\r"
         r: "\n"
     error: ERROR
     dialogues:

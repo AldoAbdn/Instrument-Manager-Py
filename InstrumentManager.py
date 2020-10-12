@@ -34,7 +34,10 @@ def instrument(ID):
     query = request.args.get("query")
     if query == None:
         instrumentDetails = getInstrumentDetail(ID)
-        response = {"ID":ID, "instrument":instrumentDetails.__dict__}
+        if(instrumentDetails != None):
+            response = {"ID":ID, "instrument":instrumentDetails.__dict__}
+        else:
+            response = {"ERROR":"Error Occured"}
         return jsonify(response)
     else:
         result = queryInstrument(ID, query)
@@ -43,7 +46,10 @@ def instrument(ID):
 
 # Util
 def getInstrumentDetail(ID):
-    instrument = resourceManager.open_resource(ID)
+    try:
+        instrument = resourceManager.open_resource(ID)
+    except:
+        return None
     instrumentDetails = Instrument(instrument.resource_name, instrument.resource_manufacturer_name, instrument.interface_number, "")
     try:
         instrumentDetails.status = instrument.last_status
@@ -69,10 +75,14 @@ def getInstrumentDetails(query="?*::INSTR"):
     instrumentDetails = []
     ids = resourceManager.list_resources(query)
     for ID in ids:
-        instrument = resourceManager.open_resource(ID)
-        instrumentDetail = getInstrumentDetail(ID)
-        instrumentDetails.append(instrumentDetail)
-        instrument.close()
+        try:
+            instrument = resourceManager.open_resource(ID)
+            instrumentDetail = getInstrumentDetail(ID)
+            if(instrumentDetail != None):
+                instrumentDetails.append(instrumentDetail)
+            instrument.close()
+        except:
+            pass
     return instrumentDetails
 
 if __name__ == '__main__':
