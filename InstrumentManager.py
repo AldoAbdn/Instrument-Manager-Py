@@ -47,7 +47,7 @@ def instrument(ID):
 # Util
 def getInstrumentDetail(ID):
     try:
-        instrument = resourceManager.open_resource(ID)
+        instrument = resourceManager.open_resource(ID, write_termination='\r\n', read_termination='\n');
     except:
         return None
     instrumentDetails = Instrument(instrument.resource_name, instrument.resource_manufacturer_name, instrument.interface_number, "")
@@ -62,7 +62,7 @@ def getInstrumentDetail(ID):
     return instrumentDetails
 
 def queryInstrument(ID,query):
-    instrument = resourceManager.open_resource(ID)
+    instrument = resourceManager.open_resource(ID, write_termination='\r\n', read_termination='\n');
     if isinstance(instrument, pyvisa.resources.MessageBasedResource):
         result = instrument.query(query)
     elif isinstance(instrument, pyvisa.resources.RegisterBasedResource):
@@ -76,7 +76,7 @@ def getInstrumentDetails(query="?*::INSTR"):
     ids = resourceManager.list_resources(query)
     for ID in ids:
         try:
-            instrument = resourceManager.open_resource(ID)
+            instrument = resourceManager.open_resource(ID, write_termination='\r\n', read_termination='\n');
             instrumentDetail = getInstrumentDetail(ID)
             if(instrumentDetail != None):
                 instrumentDetails.append(instrumentDetail)

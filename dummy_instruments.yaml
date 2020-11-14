@@ -6,25 +6,40 @@ devices:
         q: "\r\n"
         r: "\n"
       USB INSTR:
-        q: "\r"
+        q: "\r\n"
         r: "\n"
       TCPIP INSTR:
-        q: "\r"
+        q: "\r\n"
         r: "\n"
       TCPIP SOCKET:
-        q: "\r"
+        q: "\r\n"
         r: "\n"
       GPIB INSTR:
-        q: "\r"
+        q: "\r\n"
         r: "\n"
     error: ERROR
     dialogues:
       - q: "*IDN?"
-        r: "Answer Me The These Questions 3"
+        r: "Device 1"
       - q: "CAL?"
         r: "OK"
       - q: "*RST"
-        r: "I'm all reset"
+        r: "reset"
+      - q: "*TST?"
+        r: "Passed"
+      - q: "*CLS"
+        r: "Cleared"
+      - q: "*OPC?"
+        r: "Operation Completed"
+      - q: "*SRE?"
+        r: "Service Request Enable Query"
+    error:
+      response:
+        command_error: "INVALID_COMMAND"
+      status_register:
+        -q: "*ESR?"
+        command_error: 32
+        query_error: 4
     properties:
       frequency:
         default: 100.0
