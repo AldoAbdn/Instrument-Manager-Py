@@ -1,6 +1,26 @@
 // index.js
 // Main JS file for Instrument Manager
 
+// Key Entry
+function keypadPress(key) 
+{
+    let input = document.getElementById('code');
+    if(key != '#'){
+        input.value += key;
+    } else { // Submit passcode
+        alert(input.value);
+    }
+}
+
+function deleteKey() 
+{
+    let input = document.getElementById('code');
+    let text = input.value;
+    if(text != ""){
+        input.value = text.slice(0, -1);
+    }
+}
+
 // Query Instrument
 function query(id, query)
 {

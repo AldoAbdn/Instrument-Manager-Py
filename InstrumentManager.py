@@ -15,6 +15,11 @@ else:
 # Home Page
 @app.route('/')
 def index():
+    return render_template('login.html')
+
+# Instrument Manager Page
+@app.route('/instrumentmanager')
+def instrumentmanager():
     return render_template('instrumentmanager.html', instrumentDetails=getInstrumentDetails())
 
 # API

@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+
+{% block header %}
+    <h1>{% block title %}Instrument Manager{% endblock %}</h1>
+{% endblock %}
+
+{% block content %}
+    <div class="code">
+        <input id="code"></input><button onclick="deleteKey()" class="delete">DEL</button>
+    </div>
+    <div class="keypad">
+        <!--Row 1-->
+        <div class="key" onclick="keypadPress('1')">1</div>
+        <div class="key" onclick="keypadPress('2')">2</div>
+        <div class="key" onclick="keypadPress('3')">3</div>
+        <div class="key" onclick="keypadPress('A')">A</div>
+        <!--Row 2-->
+        <div class="key" onclick="keypadPress('4')">4</div>
+        <div class="key" onclick="keypadPress('5')">5</div>
+        <div class="key" onclick="keypadPress('6')">6</div>
+        <div class="key" onclick="keypadPress('B')">B</div>
+        <!--Row 3-->
+        <div class="key" onclick="keypadPress('7')">7</div>
+        <div class="key" onclick="keypadPress('8')">8</div>
+        <div class="key" onclick="keypadPress('9')">9</div>
+        <div class="key" onclick="keypadPress('C')">C</div>
+        <!--Row 4-->
+        <div class="key" onclick="keypadPress('*')">*</div>
+        <div class="key" onclick="keypadPress('0')">0</div>
+        <div class="key" onclick="keypadPress('#')">#</div>
+        <div class="key" onclick="keypadPress('D')">D</div>
+    </div>
+{% endblock %}
