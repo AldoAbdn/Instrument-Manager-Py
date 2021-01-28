@@ -8,8 +8,23 @@ function keypadPress(key)
     if(key != '#'){
         input.value += key;
     } else { // Submit passcode
-        alert(input.value);
+        login(input.value);
     }
+}
+
+function login(passcode)
+{
+    let http = new XMLHttpRequest();
+    http.onreadystatechange = function()
+    {
+        if(http.readyState = 4 && http.status >= 400){
+            showmodal("Error", "Incorrect Passcode");
+        }else if(http.readyState = 4 && http.status == 200){
+            location = "/instrumentmanager";
+        }
+    }
+    http.open("GET", "/login?passcode=" + encodeURIComponent(passcode), true);
+    http.send(null);
 }
 
 function deleteKey() 

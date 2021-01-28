@@ -1,7 +1,6 @@
-import sys, getopt, pyvisa
-from flask import Flask, render_template, jsonify, request
+import sys, getopt, pyvisa, string, json
+from flask import Flask, render_template, jsonify, request, redirect, make_response, session
 from instrument import Instrument
-import json
 
 app = Flask(__name__)
 
@@ -15,12 +14,27 @@ else:
 # Home Page
 @app.route('/')
 def index():
+    if 'username' in session:
+        session.clear()
     return render_template('login.html')
+
+# Login
+@app.route('/login')
+def login():
+    passcode = request.args.get('passcode')
+    if passcode == "1234A": # This is bad practice, only for demonstration
+        session['username'] = 'admin'
+        return redirect('/instrumentmanager')
+    else:
+        return 'Incorrect Passcode', 400
 
 # Instrument Manager Page
 @app.route('/instrumentmanager')
 def instrumentmanager():
-    return render_template('instrumentmanager.html', instrumentDetails=getInstrumentDetails())
+    if 'username' in session:
+        return render_template('instrumentmanager.html', instrumentDetails=getInstrumentDetails())
+    else:
+        return redirect('/')
 
 # API
 @app.route('/api/instruments')
@@ -52,7 +66,7 @@ def instrument(ID):
 # Util
 def getInstrumentDetail(ID):
     try:
-        instrument = resourceManager.open_resource(ID, write_termination='\r\n', read_termination='\n');
+        instrument = resourceManager.open_resource(ID, write_termination='\r\n', read_termination='\n')
     except:
         return None
     instrumentDetails = Instrument(instrument.resource_name, instrument.resource_manufacturer_name, instrument.interface_number, "")
@@ -67,7 +81,7 @@ def getInstrumentDetail(ID):
     return instrumentDetails
 
 def queryInstrument(ID,query):
-    instrument = resourceManager.open_resource(ID, write_termination='\r\n', read_termination='\n');
+    instrument = resourceManager.open_resource(ID, write_termination='\r\n', read_termination='\n')
     if isinstance(instrument, pyvisa.resources.MessageBasedResource):
         result = instrument.query(query)
     elif isinstance(instrument, pyvisa.resources.RegisterBasedResource):
@@ -91,4 +105,6 @@ def getInstrumentDetails(query="?*::INSTR"):
     return instrumentDetails
 
 if __name__ == '__main__':
+    app.secret_key = "yolo"
+    app.config['SESSION_TYPE'] = 'filesystem'
     app.run(threaded=True, debug=True, host='0.0.0.0')
