@@ -19,6 +19,14 @@ header {
     text-align: center;
 }
 
+#logout {
+    display: block;
+    width: 98%;
+    margin: 1%;
+    background: red;
+    color: white;
+}
+
 /* Tables */
 table {
     margin-left: 1%;

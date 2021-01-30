@@ -2,10 +2,15 @@
 // Main JS file for Instrument Manager
 
 window.onload = (event) => {
+    console.log("test");
     if(window.location.pathname == "/"){
         removeToken();
+        sessionStorage.setItem("loggedIn", false);
     } else {
-        location.reload();
+        let loggedIn = sessionStorage.getItem("loggedIn");
+        if(loggedIn == "false"){
+            logout();
+        }
     }
 }
 
@@ -32,10 +37,17 @@ function authenticate(passcode)
             let response = JSON.parse(http.response);
             if (response.login)
                 window.location.assign("/instrumentmanager");
+            sessionStorage.setItem("loggedIn", true);
         }
     }
     params = {username: "Admin", password: passcode};
     http.send(JSON.stringify(params));
+}
+
+function logout(){
+    removeToken();
+    sessionStorage.setItem("loggedIn", false);
+    window.location.replace("/");
 }
 
 function removeToken(){

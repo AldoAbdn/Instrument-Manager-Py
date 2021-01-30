@@ -95,7 +95,7 @@ def invalid_token(expired_token):
 @app.route('/instrumentmanager')
 @jwt_required
 def instrumentmanager():
-    return render_template('instrumentmanager.html', instrumentDetails=getInstrumentDetails())
+    return render_template('instrumentmanager.html', instrumentDetails=getInstrumentDetails(), logout = True)
 
 # API
 @app.route('/api/instruments')
