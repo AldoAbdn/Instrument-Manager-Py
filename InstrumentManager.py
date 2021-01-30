@@ -1,11 +1,12 @@
 import sys, getopt, pyvisa, string, json
-from flask import Flask, render_template, jsonify, request, redirect, make_response, session
-from flask_jwt import JWT, jwt_required, current_identity
+from flask import Flask, render_template, jsonify, request, redirect, make_response
+from flask_jwt_extended import JWTManager, jwt_required, create_access_token, get_jwt_identity, create_refresh_token, set_access_cookies, set_refresh_cookies, jwt_refresh_token_required, unset_jwt_cookies, jwt_optional
 from werkzeug.security import safe_str_cmp
 from instrument import Instrument
 from user import User
 
 app = Flask(__name__)
+jwt = JWTManager(app)
 
 users = [User(1, "Admin", "1234A")]
 username_table = {u.username: u for u in users}
@@ -19,33 +20,87 @@ else:
     resourceManager = pyvisa.ResourceManager('@py')
 
 # Home Page
+@jwt_optional
 @app.route('/')
 def index():
-    if 'username' in session:
-        session.clear()
-    return render_template('login.html')
-
-# Login
-@app.route('/login')
-def login():
-    passcode = request.args.get('passcode')
-    if passcode == "1234A": # This is bad practice, only for demonstration
-        session['username'] = 'admin'
-        return redirect('/instrumentmanager')
+    identity = get_jwt_identity()
+    print(identity)
+    if not identity:
+        print("test")
+        resp = make_response(render_template('login.html'))
+        unset_jwt_cookies(resp)
+        return resp
     else:
-        return 'Incorrect Passcode', 400
+        return redirect('/instrumentmanager')
+
+# JWT
+@app.route('/authenticate', methods=['POST'])
+def authenticate():
+    # Check params
+    if not request.is_json:
+        return jsonify({"msg": "Missing JSON in request"}), 400
+    username = request.json.get('username', None)
+    password = request.json.get('password', None)
+    if not username:
+        return jsonify({"msg": "Missing username parameter"}), 400
+    if not password:
+        return jsonify({"msg": "Missing password parameter"}), 400
+    user = getUser(username, password)
+    if not user:
+        return jsonify({"msg": "Invalid credentials"}), 400
+
+    # Create the tokens we will be sending back to the user
+    access_token = create_access_token(identity=username)
+    refresh_token = create_refresh_token(identity=username)
+
+    # Set the JWT cookies in the response
+    resp = jsonify(login=True)
+    set_access_cookies(resp, access_token)
+    set_refresh_cookies(resp, refresh_token)
+    return resp, 200
+
+# Same thing as login here, except we are only setting a new cookie
+# for the access token.
+@app.route('/token/refresh', methods=['POST'])
+@jwt_refresh_token_required
+def refresh():
+    # Create the new access token
+    current_user = get_jwt_identity()
+    access_token = create_access_token(identity=current_user)
+
+    # Set the JWT access cookie in the response
+    resp = jsonify({'refresh': True})
+    set_access_cookies(resp, access_token)
+    return resp, 200
+
+
+# Because the JWTs are stored in an httponly cookie now, we cannot
+# log the user out by simply deleting the cookie in the frontend.
+# We need the backend to send us a response to delete the cookies
+# in order to logout. unset_jwt_cookies is a helper function to
+# do just that.
+@app.route('/token/remove', methods=['POST'])
+def logout():
+    resp = jsonify({'logout': True})
+    unset_jwt_cookies(resp)
+    return resp, 200
+
+@jwt.unauthorized_loader
+def invalid_token(expired_token):
+    return redirect('/')
 
 # Instrument Manager Page
 @app.route('/instrumentmanager')
-@jwt_required()
+@jwt_required
 def instrumentmanager():
+    print(get_jwt_identity())
     return render_template('instrumentmanager.html', instrumentDetails=getInstrumentDetails())
 
 # API
 @app.route('/api/instruments')
 @app.route('/api/instruments/')
 @app.route('/api/instruments/<search>')
-@jwt_required()
+@jwt_required
 def instruments(search="?*::INSTR"):
     instruments = getInstrumentDetails(search)
     numResults = len(instruments)
@@ -55,7 +110,7 @@ def instruments(search="?*::INSTR"):
     return jsonify(response)
 
 @app.route('/api/instrument/<ID>')
-@jwt_required()
+@jwt_required
 def instrument(ID):
     query = request.args.get("query")
     if query == None:
@@ -111,17 +166,13 @@ def getInstrumentDetails(query="?*::INSTR"):
             pass
     return instrumentDetails
 
-# JWT
-def authenticate(username, password):
+def getUser(username, password):
     user = username_table.get(username, None)
     if user and safe_str_cmp(user.password.encode('utf-8'), password.encode('utf-8')):
         return user
 
-def identity(payload):
-    user_id = payload['identity']
-    return userid_table.get(user_id, None)
-
 if __name__ == '__main__':
-    app.secret_key = "yolo"
-    jwt = JWT(app, authenticate, identity)
+    app.config['JWT_SECRET_KEY'] = "yolo"
+    app.config['JWT_TOKEN_LOCATION'] = ['cookies', 'headers']
+    app.config['JWT_REFRESH_COOKIE_PATH'] = '/token/refresh'
     app.run(threaded=True, debug=True, host='0.0.0.0')

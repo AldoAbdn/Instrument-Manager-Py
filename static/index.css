@@ -8,6 +8,8 @@ body, html {
     font-family: "Trebuchet MS", Arial, Helvetica, sans-serif;
     margin: 0px;
     height: 100%;
+    display: flex;
+    flex-flow: column;
     overflow: hidden;
 }
 
@@ -49,7 +51,7 @@ input {
 }
 
 .container {
-    height: 100vh;
+    flex: 1 1;
     width: 100%;
 }
 

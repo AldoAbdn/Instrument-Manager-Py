@@ -1,29 +1,46 @@
 // index.js
 // Main JS file for Instrument Manager
 
-// Key Entry
+window.onload = (event) => {
+    if(window.location.pathname == "/"){
+        removeToken();
+    } else {
+        location.reload();
+    }
+}
+
 function keypadPress(key) 
 {
     let input = document.getElementById('code');
     if(key != '#'){
         input.value += key;
     } else { // Submit passcode
-        login(input.value);
+        authenticate(input.value);
     }
 }
 
-function login(passcode)
+function authenticate(passcode)
 {
     let http = new XMLHttpRequest();
+    http.open("POST", "/authenticate", true);
+    http.setRequestHeader('Content-type', 'application/json');
     http.onreadystatechange = function()
     {
         if(http.readyState = 4 && http.status >= 400){
             showmodal("Error", "Incorrect Passcode");
         }else if(http.readyState = 4 && http.status == 200){
-            location = "/instrumentmanager";
+            let response = JSON.parse(http.response);
+            if (response.login)
+                window.location.assign("/instrumentmanager");
         }
     }
-    http.open("GET", "/login?passcode=" + encodeURIComponent(passcode), true);
+    params = {username: "Admin", password: passcode};
+    http.send(JSON.stringify(params));
+}
+
+function removeToken(){
+    let http = new XMLHttpRequest();
+    http.open("POST", "/token/remove", false);
     http.send(null);
 }
 
@@ -36,7 +53,6 @@ function deleteKey()
     }
 }
 
-// Query Instrument
 function query(id, query)
 {
     var buttons = document.getElementsByClassName(`${id}-button`);
