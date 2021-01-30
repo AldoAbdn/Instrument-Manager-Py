@@ -24,9 +24,7 @@ else:
 @app.route('/')
 def index():
     identity = get_jwt_identity()
-    print(identity)
     if not identity:
-        print("test")
         resp = make_response(render_template('login.html'))
         unset_jwt_cookies(resp)
         return resp
@@ -37,27 +35,31 @@ def index():
 @app.route('/authenticate', methods=['POST'])
 def authenticate():
     # Check params
-    if not request.is_json:
-        return jsonify({"msg": "Missing JSON in request"}), 400
-    username = request.json.get('username', None)
-    password = request.json.get('password', None)
-    if not username:
-        return jsonify({"msg": "Missing username parameter"}), 400
-    if not password:
-        return jsonify({"msg": "Missing password parameter"}), 400
-    user = getUser(username, password)
-    if not user:
-        return jsonify({"msg": "Invalid credentials"}), 400
+    response = validateUser()
+    if response != None:
+        return response
+    else:
+        username = request.json.get('username', None)
+        # Create the tokens we will be sending back to the user
+        access_token = create_access_token(identity=username)
+        refresh_token = create_refresh_token(identity=username)
 
-    # Create the tokens we will be sending back to the user
-    access_token = create_access_token(identity=username)
-    refresh_token = create_refresh_token(identity=username)
+        # Set the JWT cookies in the response
+        resp = jsonify(login=True)
+        set_access_cookies(resp, access_token)
+        set_refresh_cookies(resp, refresh_token)
+        return resp, 200
 
-    # Set the JWT cookies in the response
-    resp = jsonify(login=True)
-    set_access_cookies(resp, access_token)
-    set_refresh_cookies(resp, refresh_token)
-    return resp, 200
+@app.route('/token/generate', methods=['POST'])
+def generate():
+    response = validateUser()
+    if response != None:
+        return response
+    else:
+        username = request.json.get('username', None)
+        # Identity can be any data that is json serializable
+        access_token = create_access_token(identity=username)
+        return jsonify(access_token=access_token), 200
 
 # Same thing as login here, except we are only setting a new cookie
 # for the access token.
@@ -93,7 +95,6 @@ def invalid_token(expired_token):
 @app.route('/instrumentmanager')
 @jwt_required
 def instrumentmanager():
-    print(get_jwt_identity())
     return render_template('instrumentmanager.html', instrumentDetails=getInstrumentDetails())
 
 # API
@@ -170,6 +171,21 @@ def getUser(username, password):
     user = username_table.get(username, None)
     if user and safe_str_cmp(user.password.encode('utf-8'), password.encode('utf-8')):
         return user
+
+def validateUser():
+    # Check params
+    if not request.is_json:
+        return jsonify({"msg": "Missing JSON in request"}), 400
+    username = request.json.get('username', None)
+    password = request.json.get('password', None)
+    if not username:
+        return jsonify({"msg": "Missing username parameter"}), 400
+    if not password:
+        return jsonify({"msg": "Missing password parameter"}), 400
+    user = getUser(username, password)
+    if not user:
+        return jsonify({"msg": "Invalid credentials"}), 400
+    return None
 
 if __name__ == '__main__':
     app.config['JWT_SECRET_KEY'] = "yolo"

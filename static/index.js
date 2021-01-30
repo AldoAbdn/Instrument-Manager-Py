@@ -40,7 +40,7 @@ function authenticate(passcode)
 
 function removeToken(){
     let http = new XMLHttpRequest();
-    http.open("POST", "/token/remove", false);
+    http.open("POST", "/token/remove", true);
     http.send(null);
 }
 
