@@ -1,8 +1,15 @@
 import sys, getopt, pyvisa, string, json
 from flask import Flask, render_template, jsonify, request, redirect, make_response, session
+from flask_jwt import JWT, jwt_required, current_identity
+from werkzeug.security import safe_str_cmp
 from instrument import Instrument
+from user import User
 
 app = Flask(__name__)
+
+users = [User(1, "Admin", "1234A")]
+username_table = {u.username: u for u in users}
+userid_table = {u.id: u for u in users}
 
 opts, args = getopt.getopt(sys.argv[1:],"s")
 if len(opts) > 0:
@@ -30,16 +37,15 @@ def login():
 
 # Instrument Manager Page
 @app.route('/instrumentmanager')
+@jwt_required()
 def instrumentmanager():
-    if 'username' in session:
-        return render_template('instrumentmanager.html', instrumentDetails=getInstrumentDetails())
-    else:
-        return redirect('/')
+    return render_template('instrumentmanager.html', instrumentDetails=getInstrumentDetails())
 
 # API
 @app.route('/api/instruments')
 @app.route('/api/instruments/')
 @app.route('/api/instruments/<search>')
+@jwt_required()
 def instruments(search="?*::INSTR"):
     instruments = getInstrumentDetails(search)
     numResults = len(instruments)
@@ -49,6 +55,7 @@ def instruments(search="?*::INSTR"):
     return jsonify(response)
 
 @app.route('/api/instrument/<ID>')
+@jwt_required()
 def instrument(ID):
     query = request.args.get("query")
     if query == None:
@@ -95,7 +102,7 @@ def getInstrumentDetails(query="?*::INSTR"):
     ids = resourceManager.list_resources(query)
     for ID in ids:
         try:
-            instrument = resourceManager.open_resource(ID, write_termination='\r\n', read_termination='\n');
+            instrument = resourceManager.open_resource(ID, write_termination='\r\n', read_termination='\n')
             instrumentDetail = getInstrumentDetail(ID)
             if(instrumentDetail != None):
                 instrumentDetails.append(instrumentDetail)
@@ -104,7 +111,17 @@ def getInstrumentDetails(query="?*::INSTR"):
             pass
     return instrumentDetails
 
+# JWT
+def authenticate(username, password):
+    user = username_table.get(username, None)
+    if user and safe_str_cmp(user.password.encode('utf-8'), password.encode('utf-8')):
+        return user
+
+def identity(payload):
+    user_id = payload['identity']
+    return userid_table.get(user_id, None)
+
 if __name__ == '__main__':
     app.secret_key = "yolo"
-    app.config['SESSION_TYPE'] = 'filesystem'
+    jwt = JWT(app, authenticate, identity)
     app.run(threaded=True, debug=True, host='0.0.0.0')
