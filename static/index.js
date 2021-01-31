@@ -2,7 +2,6 @@
 // Main JS file for Instrument Manager
 
 window.onload = (event) => {
-    console.log("test");
     if(window.location.pathname == "/"){
         removeToken();
         sessionStorage.setItem("loggedIn", false);
