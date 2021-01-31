@@ -59,6 +59,7 @@ input {
 }
 
 .container {
+    overflow: auto;
     flex: 1 1;
     width: 100%;
 }
@@ -120,7 +121,12 @@ input {
     background-color: none;
 }
 
-.keypad {
+#KeypadLock {
+    height: 97%;
+    margin: 1%;
+}
+
+#Keypad {
     width: 100%;
     margin-top:1.5%;
     height: 80%;
@@ -148,13 +154,13 @@ input {
     background: lightgreen;
 }
 
-.code {
+#CodeDisplay {
     width: 100%;
     display: grid;
     grid-template-columns: 80% 20%;
 }
 
-#code {
+#Code {
     width: auto;
     font-size: xx-large;
 }

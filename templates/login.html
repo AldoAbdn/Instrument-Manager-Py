@@ -5,11 +5,11 @@
 {% endblock %}
 
 {% block content %}
-    <div style="height:100%; margin:1%;">
-        <div class="code">
-            <input id="code"></input><button onclick="deleteKey()" class="delete">DEL</button>
+    <div id="KeypadLock">
+        <div id="CodeDisplay">
+            <input id="Code"></input><button onclick="deleteKey()" class="delete">DEL</button>
         </div>
-        <div class="keypad">
+        <div id="Keypad">
             <!--Row 1-->
             <div class="key" onclick="keypadPress('1')">1</div>
             <div class="key" onclick="keypadPress('2')">2</div>

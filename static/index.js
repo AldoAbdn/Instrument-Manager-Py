@@ -15,7 +15,7 @@ window.onload = (event) => {
 
 function keypadPress(key) 
 {
-    let input = document.getElementById('code');
+    let input = document.getElementById('Code');
     if(key != '#'){
         input.value += key;
     } else { // Submit passcode

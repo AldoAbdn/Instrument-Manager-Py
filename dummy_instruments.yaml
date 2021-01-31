@@ -6,16 +6,16 @@ devices:
         q: "\r\n"
         r: "\n"
       USB INSTR:
-        q: "\r\n"
+        q: "\n"
         r: "\n"
       TCPIP INSTR:
-        q: "\r\n"
+        q: "\n"
         r: "\n"
       TCPIP SOCKET:
-        q: "\r\n"
+        q: "\n"
         r: "\n"
       GPIB INSTR:
-        q: "\r\n"
+        q: "\n"
         r: "\n"
     error: ERROR
     dialogues:
@@ -33,13 +33,6 @@ devices:
         r: "Operation Completed"
       - q: "*SRE?"
         r: "Service Request Enable Query"
-    error:
-      response:
-        command_error: "INVALID_COMMAND"
-      status_register:
-        -q: "*ESR?"
-        command_error: 32
-        query_error: 4
     properties:
       frequency:
         default: 100.0
