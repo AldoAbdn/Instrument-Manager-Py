@@ -1,5 +1,5 @@
-import sys, getopt, pyvisa, string, json
-from flask import Flask, render_template, jsonify, request, redirect, make_response
+import sys, getopt, pyvisa, string, json, os
+from flask import Flask, render_template, jsonify, request, redirect, make_response, send_from_directory
 from flask_jwt_extended import JWTManager, jwt_required, create_access_token, get_jwt_identity, create_refresh_token, set_access_cookies, set_refresh_cookies, jwt_refresh_token_required, unset_jwt_cookies, jwt_optional
 from werkzeug.security import safe_str_cmp
 from instrument import Instrument
@@ -96,6 +96,11 @@ def invalid_token(expired_token):
 @jwt_required
 def instrumentmanager():
     return render_template('instrumentmanager.html', instrumentDetails=getInstrumentDetails(), logout = True)
+
+# Favicon
+@app.route('/favicon.ico') 
+def favicon(): 
+    return send_from_directory(os.path.join(app.root_path, 'static'), 'favicon.ico', mimetype='image/vnd.microsoft.icon')
 
 # API
 @app.route('/api/instruments')
