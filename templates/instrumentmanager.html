@@ -12,9 +12,7 @@
             <th>Manufacturer</th>
             <th>Board Number</th>
             <th>Last Status</th>
-            <th>IDN</th>
-            <th>Self Test</th>
-	    <th>Query</th>
+	        <th>Query</th>
         </tr>
         </thead>
         <tbody>
@@ -24,11 +22,17 @@
             <td>{{ instrument.manufacturer }}</td>
             <td>{{ instrument.board_number }}</td>
             <td>{{ instrument.status }}</td>
-            <td><button class="{{ instrument.name }}-button" onclick="query('{{ instrument.name }}','*IDN?')">IDN</button</td>
-            <td><button class="{{ instrument.name }}-button" onclick="query('{{ instrument.name }}','*TST?')">Self Test</button></td>
             <td>
                 <form onsubmit="event.preventDefault(); query('{{ instrument.name }}',document.getElementById('{{ instrument.name }}-query').value); return false;">
-                    <input type="text" id="{{ instrument.name }}-query" name="queryText"/>
+                    <select name="queries" id="{{ instrument.name }}-query">
+                        <option value="*IDN?">*IDN?</option>
+                        <option value="CAL?">CAL?</option>
+                        <option value="*RST">*RST</option>
+                        <option value="*TST?">*TST?</option>
+                        <option value="*CLS">*CLS</option>
+                        <option value="*OPC?">*OPC?</option>
+                        <option value="*SRE?">*SRE?</option>
+                    </select>
                     <button class="{{ instrument.name }}-button" onclick="query('{{ instrument.name }}',document.getElementById('{{ instrument.name }}-query').value)">Query</button>
                 </form>
             </td>
