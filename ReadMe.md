@@ -4,7 +4,9 @@ Simple Python based flask app that displays installed instruments. Uses PyVISA a
 Designed to run on a raspberry pi, provides a public API for querying instruments.
 
 ## How to Run
-There is a shell script called instrumentmanager.sh that will run the flask server in simulation mode and open a fullscreen instance of Chromium, tested on Raspian OS.
+There is a shell script called instrumentmanager.sh that will run the flask server and open a fullscreen instance of Chromium, tested on Raspian OS.
+
+There is a shell script called instrumentmanagersim.sh that will run the flask server in simulation mode and open a fullscreen instance of Chromium, tested on Raspian OS.
 
 Alternatively run the following command in a terminal: Python3 InstrumentManager.py
 
