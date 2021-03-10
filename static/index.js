@@ -57,7 +57,7 @@ function removeToken(){
 
 function deleteKey() 
 {
-    let input = document.getElementById('code');
+    let input = document.getElementById('Code');
     let text = input.value;
     if(text != ""){
         input.value = text.slice(0, -1);
